@@ -140,9 +140,13 @@ class TestZabbixClientConnection:
 class TestZabbixClientOperations:
     """Tests for ZabbixClient API operations."""
 
+    # =========================================================================
+    # Hostgroup Operations
+    # =========================================================================
+
     @patch("zabbix_client.client.ZabbixAPI")
     def test_get_hostgroup_id(self, mock_api_class: MagicMock) -> None:
-        """Test getting host group ID."""
+        """Test getting hostgroup ID."""
         mock_api = MagicMock()
         mock_api.hostgroup.get.return_value = [{"groupid": "123"}]
         mock_api_class.return_value = mock_api
@@ -156,8 +160,56 @@ class TestZabbixClientOperations:
         mock_api.hostgroup.get.assert_called_once()
 
     @patch("zabbix_client.client.ZabbixAPI")
-    def test_get_visible_hostids(self, mock_api_class: MagicMock) -> None:
-        """Test getting visible host IDs."""
+    def test_get_hostgroup_id_not_found(self, mock_api_class: MagicMock) -> None:
+        """Test getting hostgroup ID raises ValueError when not found."""
+        mock_api = MagicMock()
+        mock_api.hostgroup.get.return_value = []
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(ValueError, match="Hostgroup not found"):
+                client.get_hostgroup_id("nonexistent-group")
+
+    # =========================================================================
+    # Templategroup Operations
+    # =========================================================================
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_templategroup_id(self, mock_api_class: MagicMock) -> None:
+        """Test getting templategroup ID."""
+        mock_api = MagicMock()
+        mock_api.templategroup.get.return_value = [{"groupid": "456"}]
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            result = client.get_templategroup_id("my-template-group")
+
+        assert result == "456"
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_templategroup_id_not_found(self, mock_api_class: MagicMock) -> None:
+        """Test getting templategroup ID raises ValueError when not found."""
+        mock_api = MagicMock()
+        mock_api.templategroup.get.return_value = []
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(ValueError, match="Templategroup not found"):
+                client.get_templategroup_id("nonexistent-group")
+
+    # =========================================================================
+    # Host Operations
+    # =========================================================================
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_all_host_ids(self, mock_api_class: MagicMock) -> None:
+        """Test getting all visible host IDs."""
         mock_api = MagicMock()
         mock_api.host.get.return_value = [
             {"hostid": "1"},
@@ -169,9 +221,161 @@ class TestZabbixClientOperations:
         with ZabbixClient(
             url="http://example.com", username="user", password="pass"
         ) as client:
-            result = client.get_visible_hostids()
+            result = client.get_all_host_ids()
 
         assert result == ["1", "2", "3"]
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_host_by_trigger_id(self, mock_api_class: MagicMock) -> None:
+        """Test getting host by trigger ID."""
+        mock_api = MagicMock()
+        mock_api.trigger.get.return_value = [
+            {
+                "triggerid": "100",
+                "description": "Test trigger",
+                "hosts": [{"hostid": "1", "host": "my-host"}],
+            }
+        ]
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            result = client.get_host_by_trigger_id("100")
+
+        assert result == {"hostid": "1", "host": "my-host"}
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_host_by_trigger_id_not_found(self, mock_api_class: MagicMock) -> None:
+        """Test getting host by trigger ID raises ValueError when not found."""
+        mock_api = MagicMock()
+        mock_api.trigger.get.return_value = []
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(ValueError, match="Trigger not found"):
+                client.get_host_by_trigger_id("999")
+
+    # =========================================================================
+    # Template Operations
+    # =========================================================================
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_template_id(self, mock_api_class: MagicMock) -> None:
+        """Test getting template ID."""
+        mock_api = MagicMock()
+        mock_api.template.get.return_value = [{"templateid": "789"}]
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            result = client.get_template_id("my-template")
+
+        assert result == "789"
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_template_id_not_found(self, mock_api_class: MagicMock) -> None:
+        """Test getting template ID raises ValueError when not found."""
+        mock_api = MagicMock()
+        mock_api.template.get.return_value = []
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(ValueError, match="Template not found"):
+                client.get_template_id("nonexistent-template")
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_all_template_ids(self, mock_api_class: MagicMock) -> None:
+        """Test getting all visible template IDs."""
+        mock_api = MagicMock()
+        mock_api.template.get.return_value = [
+            {"templateid": "10"},
+            {"templateid": "20"},
+        ]
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            result = client.get_all_template_ids()
+
+        assert result == ["10", "20"]
+
+    # =========================================================================
+    # Item Operations
+    # =========================================================================
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_item_id_by_trigger_id(self, mock_api_class: MagicMock) -> None:
+        """Test getting item ID by trigger ID."""
+        mock_api = MagicMock()
+        mock_api.item.get.return_value = [{"itemid": "555"}]
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            result = client.get_item_id_by_trigger_id("100")
+
+        assert result == "555"
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_item_id_by_trigger_id_not_found(
+        self, mock_api_class: MagicMock
+    ) -> None:
+        """Test getting item ID by trigger ID raises ValueError when not found."""
+        mock_api = MagicMock()
+        mock_api.item.get.return_value = []
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(ValueError, match="No item found for trigger"):
+                client.get_item_id_by_trigger_id("999")
+
+    # =========================================================================
+    # User Operations
+    # =========================================================================
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_user_by_username(self, mock_api_class: MagicMock) -> None:
+        """Test getting user by username."""
+        mock_api = MagicMock()
+        mock_api.user.get.return_value = [
+            {"userid": "1", "username": "admin", "name": "Admin", "surname": "User"}
+        ]
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            result = client.get_user_by_username("admin")
+
+        assert result["userid"] == "1"
+        assert result["username"] == "admin"
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_user_by_username_not_found(self, mock_api_class: MagicMock) -> None:
+        """Test getting user by username raises ValueError when not found."""
+        mock_api = MagicMock()
+        mock_api.user.get.return_value = []
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(ValueError, match="User not found"):
+                client.get_user_by_username("nonexistent")
+
+    # =========================================================================
+    # Macro Operations
+    # =========================================================================
 
     @patch("zabbix_client.client.ZabbixAPI")
     def test_get_user_macro_value_found(self, mock_api_class: MagicMock) -> None:
@@ -189,7 +393,7 @@ class TestZabbixClientOperations:
 
     @patch("zabbix_client.client.ZabbixAPI")
     def test_get_user_macro_value_not_found(self, mock_api_class: MagicMock) -> None:
-        """Test getting user macro value when not found."""
+        """Test getting user macro value raises ValueError when not found."""
         mock_api = MagicMock()
         mock_api.usermacro.get.return_value = []
         mock_api_class.return_value = mock_api
@@ -197,6 +401,36 @@ class TestZabbixClientOperations:
         with ZabbixClient(
             url="http://example.com", username="user", password="pass"
         ) as client:
-            result = client.get_user_macro_value("123", "{$MY_MACRO}")
+            with pytest.raises(ValueError, match="Macro .* not found for host"):
+                client.get_user_macro_value("123", "{$MY_MACRO}")
 
-        assert result is None
+    # =========================================================================
+    # Discovery Rule Operations
+    # =========================================================================
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_discovery_rule_id(self, mock_api_class: MagicMock) -> None:
+        """Test getting discovery rule ID."""
+        mock_api = MagicMock()
+        mock_api.discoveryrule.get.return_value = [{"itemid": "999"}]
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            result = client.get_discovery_rule_id("my-discovery-rule")
+
+        assert result == "999"
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_get_discovery_rule_id_not_found(self, mock_api_class: MagicMock) -> None:
+        """Test getting discovery rule ID raises ValueError when not found."""
+        mock_api = MagicMock()
+        mock_api.discoveryrule.get.return_value = []
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(ValueError, match="Discovery rule not found"):
+                client.get_discovery_rule_id("nonexistent-rule")
