@@ -21,7 +21,6 @@ from zabbix_client.constants import (
     ITEM_TYPE_MAP,
     ITEM_TYPE_SCRIPT,
     ITEM_TYPE_SIMPLE_CHECK,
-    ITEM_TYPE_SNMP_AGENT,
     ITEM_TYPE_SNMP_AGENT_V3,
     ITEM_TYPE_SNMP_TRAP,
     ITEM_TYPE_SSH_AGENT,

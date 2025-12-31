@@ -26,7 +26,6 @@ VALID_TRIGGER_STATUSES: frozenset[str] = frozenset(("FATAL", "CRITICAL", "WARNIN
 # =============================================================================
 
 ITEM_TYPE_ZABBIX_AGENT: int = 0
-ITEM_TYPE_SNMP_AGENT: int = 1
 ITEM_TYPE_ZABBIX_TRAPPER: int = 2
 ITEM_TYPE_SIMPLE_CHECK: int = 3
 ITEM_TYPE_ZABBIX_INTERNAL: int = 5
@@ -46,7 +45,6 @@ ITEM_TYPE_SCRIPT: int = 21
 
 ITEM_TYPE_MAP: dict[str, int] = {
     "zabbix_agent": ITEM_TYPE_ZABBIX_AGENT,
-    "snmp": ITEM_TYPE_SNMP_AGENT,
     "trapper": ITEM_TYPE_ZABBIX_TRAPPER,
     "simple": ITEM_TYPE_SIMPLE_CHECK,
     "internal": ITEM_TYPE_ZABBIX_INTERNAL,
