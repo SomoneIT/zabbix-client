@@ -233,3 +233,9 @@ INVENTORY: dict[str, int] = {
     "URL_C": 37,
     "VENDOR": 31,
 }
+
+INVENTORY_MODE: dict[str, int] = {
+    "DISABLED": -1,
+    "MANUAL": 0,
+    "AUTOMATIC": 1,
+}
