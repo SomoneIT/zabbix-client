@@ -12,7 +12,7 @@ authors = [
     { name = "Romain GILLE", email = "rgille@somone.fr" },
 ]
 dependencies = [
-    "zabbix-utils>=2.0.4",
+    "zabbix-utils[async]>=2.0.4",
 ]
 
 [project.urls]
