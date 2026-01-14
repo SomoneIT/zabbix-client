@@ -9,8 +9,9 @@ import os
 from unittest.mock import MagicMock, patch
 
 import pytest
+from zabbix_utils.exceptions import APIRequestError
 
-from zabbix_client import ZabbixClient
+from zabbix_client import EntityAlreadyExistsError, ZabbixClient, ZabbixClientError
 
 
 class TestZabbixClientInit:
@@ -172,6 +173,50 @@ class TestZabbixClientOperations:
             with pytest.raises(ValueError, match="Hostgroup not found"):
                 client.get_hostgroup_id("nonexistent-group")
 
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_create_hostgroup_success(self, mock_api_class: MagicMock) -> None:
+        """Test successful hostgroup creation."""
+        mock_api = MagicMock()
+        mock_api.hostgroup.create.return_value = {"groupids": ["789"]}
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            result = client.create_hostgroup("new-host-group")
+
+        assert result == {"groupids": ["789"]}
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_create_hostgroup_already_exists(self, mock_api_class: MagicMock) -> None:
+        """Test creating hostgroup raises EntityAlreadyExistsError when exists."""
+        mock_api = MagicMock()
+        mock_api.hostgroup.create.side_effect = APIRequestError(
+            "Host group 'test' already exists."
+        )
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(
+                EntityAlreadyExistsError, match="hostgroup already exists: test"
+            ):
+                client.create_hostgroup("test")
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_create_hostgroup_other_error(self, mock_api_class: MagicMock) -> None:
+        """Test creating hostgroup raises ZabbixClientError for other errors."""
+        mock_api = MagicMock()
+        mock_api.hostgroup.create.side_effect = APIRequestError("Some other API error")
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(ZabbixClientError, match="Failed to create"):
+                client.create_hostgroup("test")
+
     # =========================================================================
     # Templategroup Operations
     # =========================================================================
@@ -202,6 +247,54 @@ class TestZabbixClientOperations:
         ) as client:
             with pytest.raises(ValueError, match="Templategroup not found"):
                 client.get_templategroup_id("nonexistent-group")
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_create_templategroup_success(self, mock_api_class: MagicMock) -> None:
+        """Test successful templategroup creation."""
+        mock_api = MagicMock()
+        mock_api.templategroup.create.return_value = {"groupids": ["123"]}
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            result = client.create_templategroup("new-template-group")
+
+        assert result == {"groupids": ["123"]}
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_create_templategroup_already_exists(
+        self, mock_api_class: MagicMock
+    ) -> None:
+        """Test creating templategroup raises EntityAlreadyExistsError when exists."""
+        mock_api = MagicMock()
+        mock_api.templategroup.create.side_effect = APIRequestError(
+            "Template group 'test' already exists."
+        )
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(
+                EntityAlreadyExistsError, match="templategroup already exists: test"
+            ):
+                client.create_templategroup("test")
+
+    @patch("zabbix_client.client.ZabbixAPI")
+    def test_create_templategroup_other_error(self, mock_api_class: MagicMock) -> None:
+        """Test creating templategroup raises ZabbixClientError for other errors."""
+        mock_api = MagicMock()
+        mock_api.templategroup.create.side_effect = APIRequestError(
+            "Some other API error"
+        )
+        mock_api_class.return_value = mock_api
+
+        with ZabbixClient(
+            url="http://example.com", username="user", password="pass"
+        ) as client:
+            with pytest.raises(ZabbixClientError, match="Failed to create"):
+                client.create_templategroup("test")
 
     # =========================================================================
     # Host Operations

@@ -79,6 +79,7 @@ from zabbix_client.constants import (
     VALUE_TYPE_UNSIGNED,
     ZABBIX_SEVERITIES,
 )
+from zabbix_client.exceptions import EntityAlreadyExistsError, ZabbixClientError
 
 __version__ = "0.1.0"
 
@@ -86,6 +87,9 @@ __all__ = [
     # Main client
     "ZabbixClient",
     "AsyncZabbixClient",
+    # Exceptions
+    "ZabbixClientError",
+    "EntityAlreadyExistsError",
     # Version
     "__version__",
     # Severity constants

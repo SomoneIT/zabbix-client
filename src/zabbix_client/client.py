@@ -12,6 +12,8 @@ from typing import Any, cast
 from zabbix_utils import ZabbixAPI
 from zabbix_utils.exceptions import APIRequestError, ProcessingError
 
+from zabbix_client.exceptions import EntityAlreadyExistsError, ZabbixClientError
+
 logger = logging.getLogger(__name__)
 
 
@@ -125,10 +127,19 @@ class ZabbixClient:
 
         Returns:
             API response containing the created templategroup info.
+
+        Raises:
+            EntityAlreadyExistsError: If the templategroup already exists.
+            ZabbixClientError: If the creation fails for other reasons.
         """
         logger.info("Creating templategroup %s", name)
         client = self._ensure_connected()
-        return cast(dict[str, Any], client.templategroup.create({"name": name}))  # type: ignore[attr-defined]
+        try:
+            return cast(dict[str, Any], client.templategroup.create({"name": name}))  # type: ignore[attr-defined]
+        except APIRequestError as e:
+            if "already exists" in str(e):
+                raise EntityAlreadyExistsError("templategroup", name) from e
+            raise ZabbixClientError(f"Failed to create templategroup: {e}") from e
 
     def get_templategroup_id(self, name: str) -> str:
         """Get templategroup ID by name.
@@ -162,10 +173,19 @@ class ZabbixClient:
 
         Returns:
             API response containing the created hostgroup info.
+
+        Raises:
+            EntityAlreadyExistsError: If the hostgroup already exists.
+            ZabbixClientError: If the creation fails for other reasons.
         """
         logger.info("Creating hostgroup %s", name)
         client = self._ensure_connected()
-        return cast(dict[str, Any], client.hostgroup.create({"name": name}))  # type: ignore[attr-defined]
+        try:
+            return cast(dict[str, Any], client.hostgroup.create({"name": name}))  # type: ignore[attr-defined]
+        except APIRequestError as e:
+            if "already exists" in str(e):
+                raise EntityAlreadyExistsError("hostgroup", name) from e
+            raise ZabbixClientError(f"Failed to create hostgroup: {e}") from e
 
     def get_hostgroup_id(self, name: str) -> str:
         """Get hostgroup ID by name.
