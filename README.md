@@ -7,7 +7,7 @@ A unified Python client for the Zabbix API with connection management and compre
 - **Context manager support** for automatic connection handling
 - **Read operations** for monitoring and dashboards
 - **Write operations** for configuration management
-- **Comprehensive constants** for Zabbix API values
+- **Comprehensive constants** as Enums for Zabbix API values
 - **Type hints** throughout for better IDE support
 
 ## Installation
@@ -52,7 +52,7 @@ from zabbix_client import ZabbixClient
 with ZabbixClient(url, username, password) as client:
     # Read operations
     hosts = client.get_hosts_by_hostgroup("my-group")
-    problems = client.get_problems_with_severities([4, 5], ["1"])
+    problems = client.get_problems_by_severity([4, 5], ["1"])
 
     # Write operations
     client.create_hostgroup("new-group")
@@ -70,7 +70,7 @@ os.environ["ZABBIX_SERVER_USER"] = "Admin"
 os.environ["ZABBIX_SERVER_PASSWORD"] = "secret"
 
 with ZabbixClient() as client:
-    hosts = client.get_visible_hostids()
+    hosts = client.get_all_host_ids()
 ```
 
 ### Manual Connection Management
@@ -92,33 +92,30 @@ finally:
 
 - `create_templategroup(name)` - Create a template group
 - `get_templategroup_id(name)` - Get template group ID by name
-- `get_templategroup_id_by_name(name)` - Get template group info (returns list)
 
 ### Host Group Operations
 
 - `create_hostgroup(name)` - Create a host group
 - `get_hostgroup_id(name)` - Get host group ID by name
-- `get_hostgroup_id_by_name(name)` - Get host group info (returns list)
-- `get_hostgroupid_by_name(name)` - Get host group ID or None
 - `propagate_hostgroup(hostgroup_id)` - Propagate host group permissions
 
 ### Host Operations
 
 - `get_hosts_by_hostgroup(hostgroup_name)` - Get all hosts in a group
-- `get_host_by_triggerid(triggerid)` - Get host name by trigger ID
-- `get_visible_hostids()` - Get all visible host IDs
+- `get_host_by_trigger_id(trigger_id)` - Get host info by trigger ID
+- `get_all_host_ids()` - Get all visible host IDs
 
 ### Template Operations
 
 - `get_template_id(name)` - Get template ID by name
-- `get_templates_by_templategroup(name)` - Get templates in a group
-- `get_visible_templateids()` - Get all visible template IDs
+- `get_templates_by_templategroup(templategroup_name)` - Get templates in a group
+- `get_all_template_ids()` - Get all visible template IDs
 
 ### Item Operations
 
 - `get_item_path(key)` - Get item path by key
-- `get_items_by_hosts(hostid)` - Get items for a host
-- `get_item_by_triggerid(triggerid)` - Get item ID by trigger ID
+- `get_items_by_host(host_id)` - Get items for a host
+- `get_item_id_by_trigger_id(trigger_id)` - Get item ID by trigger ID
 
 ### Discovery Rule Operations
 
@@ -126,7 +123,7 @@ finally:
 
 ### Problem Operations
 
-- `get_problems_with_severities(severities, groupids)` - Get problems by severity
+- `get_problems_by_severity(severities, hostgroup_ids)` - Get problems by severity
 
 ### User Operations
 
@@ -138,35 +135,49 @@ finally:
 
 ## Constants
 
-The package exports various Zabbix constants for use in your code:
+The package exports Zabbix constants as Enums:
 
 ```python
-from zabbix_client import (
-    # Severities
-    ZABBIX_SEVERITIES,
-    VALID_TRIGGER_STATUSES,
+from zabbix_client.constants import (
+    # Severity levels
+    Severity,
 
     # Item types
-    ITEM_TYPE_SCRIPT,
-    ITEM_TYPE_CALCULATED,
-    ITEM_TYPE_MAP,
+    ItemType,
 
-    # Preprocessing
-    PREPROCESSING_JAVASCRIPT,
-    PREPROCESSING_CSV_TO_JSON,
+    # Preprocessing types
+    PreprocessingType,
 
     # Value types
-    VALUE_TYPE_TEXT,
-    VALUE_TYPE_MAP,
+    ValueType,
+
+    # Interface/Agent types
+    InterfaceType,
 
     # Status
-    STATUS_ENABLED,
-    STATUS_DISABLED,
+    Status,
 
     # Trigger priorities
-    TRIGGER_PRIORITY_DISASTER,
-    TRIGGER_PRIORITY_HIGH,
+    TriggerPriority,
+
+    # User roles
+    UserRole,
+
+    # Inventory
+    InventoryMode,
+    InventoryField,
 )
+
+# Usage examples
+item_type = ItemType.SCRIPT  # 21
+priority = TriggerPriority.HIGH  # 4
+status = Status.ENABLED  # 0
+
+# Enums work as integers
+assert ItemType.SCRIPT == 21
+
+# Lookup by name
+field = InventoryField["LOCATION"]  # InventoryField.LOCATION (24)
 ```
 
 ## Development

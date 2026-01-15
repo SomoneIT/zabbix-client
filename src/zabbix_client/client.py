@@ -135,7 +135,7 @@ class ZabbixClient:
         logger.info("Creating templategroup %s", name)
         client = self._ensure_connected()
         try:
-            return cast(dict[str, Any], client.templategroup.create({"name": name}))  # type: ignore[attr-defined]
+            return cast(dict[str, Any], client.templategroup.create(name=name))  # type: ignore[attr-defined]
         except APIRequestError as e:
             if "already exists" in str(e):
                 raise EntityAlreadyExistsError("templategroup", name) from e
@@ -155,7 +155,8 @@ class ZabbixClient:
         """
         client = self._ensure_connected()
         result = client.templategroup.get(  # type: ignore[attr-defined]
-            {"filter": {"name": name}, "output": ["groupid"]}
+            filter={"name": name},
+            output=["groupid"],
         )
         if not result:
             raise ValueError(f"Templategroup not found: {name}")
@@ -181,7 +182,7 @@ class ZabbixClient:
         logger.info("Creating hostgroup %s", name)
         client = self._ensure_connected()
         try:
-            return cast(dict[str, Any], client.hostgroup.create({"name": name}))  # type: ignore[attr-defined]
+            return cast(dict[str, Any], client.hostgroup.create(name=name))  # type: ignore[attr-defined]
         except APIRequestError as e:
             if "already exists" in str(e):
                 raise EntityAlreadyExistsError("hostgroup", name) from e
@@ -202,7 +203,8 @@ class ZabbixClient:
         logger.info("Getting hostgroup id %s", name)
         client = self._ensure_connected()
         result = client.hostgroup.get(  # type: ignore[attr-defined]
-            {"filter": {"name": name}, "output": ["groupid"]}
+            filter={"name": name},
+            output=["groupid"],
         )
         if not result:
             raise ValueError(f"Hostgroup not found: {name}")
@@ -217,11 +219,9 @@ class ZabbixClient:
         logger.info("Propagating hostgroup %s", hostgroup_id)
         client = self._ensure_connected()
         client.hostgroup.propagate(  # type: ignore[attr-defined]
-            {
-                "groups": [{"groupid": hostgroup_id}],
-                "permissions": True,
-                "tag_filters": True,
-            }
+            groups=[{"groupid": hostgroup_id}],
+            permissions=True,
+            tag_filters=True,
         )
 
     # =========================================================================
@@ -246,14 +246,12 @@ class ZabbixClient:
         return cast(
             list[dict[str, Any]],
             client.host.get(  # type: ignore[attr-defined]
-                {
-                    "groupids": hostgroup_id,
-                    "output": ["host", "hostid", "status"],
-                    "selectTags": "extend",
-                    "selectInheritedTags": "extend",
-                    "selectParentTemplates": ["templateid"],
-                    "selectInventory": ["location_lat", "location_lon"],
-                }
+                groupids=hostgroup_id,
+                output=["host", "hostid", "status"],
+                selectTags="extend",
+                selectInheritedTags="extend",
+                selectParentTemplates=["templateid"],
+                selectInventory=["location_lat", "location_lon"],
             ),
         )
 
@@ -320,7 +318,8 @@ class ZabbixClient:
         logger.info("Getting template id %s", name)
         client = self._ensure_connected()
         result = client.template.get(  # type: ignore[attr-defined]
-            {"filter": {"name": name}, "output": ["templateid"]}
+            filter={"name": name},
+            output=["templateid"],
         )
         if not result:
             raise ValueError(f"Template not found: {name}")
@@ -346,13 +345,11 @@ class ZabbixClient:
         return cast(
             list[dict[str, Any]],
             client.template.get(  # type: ignore[attr-defined]
-                {
-                    "groupids": templategroup_id,
-                    "output": ["host", "templateid"],
-                    "selectTags": "extend",
-                    "selectInheritedTags": "extend",
-                    "selectHosts": ["hostid"],
-                }
+                groupids=templategroup_id,
+                output=["host", "templateid"],
+                selectTags="extend",
+                selectInheritedTags="extend",
+                selectHosts=["hostid"],
             ),
         )
 
@@ -385,12 +382,10 @@ class ZabbixClient:
         logger.info("Getting item with key %s", key)
         client = self._ensure_connected()
         items = client.item.get(  # type: ignore[attr-defined]
-            {
-                "search": {"key_": key},
-                "output": ["key_"],
-                "templated": "true",
-                "selectHosts": ["host"],
-            }
+            search={"key_": key},
+            output=["key_"],
+            templated=True,
+            selectHosts=["host"],
         )
         if not items:
             raise ValueError(f"Item not found for key: {key}")
@@ -462,7 +457,8 @@ class ZabbixClient:
         """
         client = self._ensure_connected()
         result = client.discoveryrule.get(  # type: ignore[attr-defined]
-            {"output": ["itemid"], "filter": {"name": name}}
+            output=["itemid"],
+            filter={"name": name},
         )
         if not result:
             raise ValueError(f"Discovery rule not found: {name}")
