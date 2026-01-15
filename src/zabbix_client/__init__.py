@@ -4,7 +4,6 @@ Zabbix Client Package
 A unified Zabbix API client for connection management and operations.
 """
 
-from zabbix_client.async_client import AsyncZabbixClient
 from zabbix_client.client import ZabbixClient
 from zabbix_client.constants import (
     AGENT_TYPE_IPMI,
@@ -86,7 +85,6 @@ __version__ = "0.1.0"
 __all__ = [
     # Main client
     "ZabbixClient",
-    "AsyncZabbixClient",
     # Exceptions
     "ZabbixClientError",
     "EntityAlreadyExistsError",
