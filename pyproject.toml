@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zabbix-client"
-version = "0.1.0"
+version = "0.2.0"
 description = "Unified Zabbix API client for connection management and operations"
 readme = "README.md"
 requires-python = ">=3.14"
