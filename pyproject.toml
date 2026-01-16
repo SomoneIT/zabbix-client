@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zabbix-client"
-version = "0.2.0"
+version = "1.0.0"
 description = "Unified Zabbix API client for connection management and operations"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -26,6 +26,7 @@ dev = [
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.14.10",
+    "ty>=0.0.12",
 ]
 
 [tool.hatch.build.targets.sdist]
